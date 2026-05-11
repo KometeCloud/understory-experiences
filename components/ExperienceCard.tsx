@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import { useState } from 'react'
 import { BookingModal } from './BookingModal'
-import type { Experience } from '@/lib/understory'
+import type { ExperienceWithPrice } from '@/lib/understory'
 
 const STATE_COLORS: Record<string, string> = {
   ACTIVE: 'bg-green-100 text-green-700',
@@ -14,7 +14,7 @@ const STATE_COLORS: Record<string, string> = {
 
 type Media = { type: string; url: string; mime_type: string }
 
-export function ExperienceCard({ exp }: { exp: Experience }) {
+export function ExperienceCard({ exp }: { exp: ExperienceWithPrice }) {
   const [bookingOpen, setBookingOpen] = useState(false)
 
   const media = exp.media as Media[] | undefined
@@ -57,7 +57,13 @@ export function ExperienceCard({ exp }: { exp: Experience }) {
           )}
 
           <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
-            <p className="text-xs text-gray-400 font-mono">{exp.id}</p>
+            {exp.priceFrom ? (
+              <p className="text-sm font-semibold text-gray-900">
+                Da {exp.priceFrom} <span className="text-xs font-normal text-gray-500">/ persona</span>
+              </p>
+            ) : (
+              <span />
+            )}
             <button
               onClick={() => setBookingOpen(true)}
               className="text-sm font-medium bg-gray-900 text-white px-4 py-1.5 rounded-lg hover:bg-gray-700 transition-colors"

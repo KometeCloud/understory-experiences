@@ -1,15 +1,14 @@
-import { fetchExperiences } from '@/lib/understory'
+import { fetchExperiences, type ExperienceWithPrice } from '@/lib/understory'
 import { ExperienceCard } from '@/components/ExperienceCard'
 
 export const revalidate = 60
 
 export default async function Page() {
-  let experiences: Awaited<ReturnType<typeof fetchExperiences>>['items'] = []
+  let experiences: ExperienceWithPrice[] = []
   let error: string | null = null
 
   try {
-    const data = await fetchExperiences()
-    experiences = data.items ?? []
+    experiences = await fetchExperiences()
   } catch (err) {
     error = err instanceof Error ? err.message : 'Errore sconosciuto'
   }

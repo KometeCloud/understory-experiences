@@ -29,19 +29,45 @@ export type Experience = {
   state: string
 } & Record<string, unknown>
 
-export type ExperiencesResponse = {
-  items: Experience[]
-  next: string
+export type TicketVariant = {
+  id: string
+  name: string
+  price: { currency: string; value: number; exponent: number }
 }
 
-export async function fetchExperiences(): Promise<ExperiencesResponse> {
+export type ExperienceWithPrice = Experience & { priceFrom: string | null }
+
+export function formatPrice(variant: TicketVariant): string {
+  const amount = variant.price.value / Math.pow(10, variant.price.exponent)
+  return new Intl.NumberFormat('it-IT', {
+    style: 'currency',
+    currency: variant.price.currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(amount)
+}
+
+async function fetchVariants(
+  experienceId: string,
+  token: string,
+): Promise<TicketVariant[]> {
+  const res = await fetch(
+    `${API_BASE}/v1/experiences/${experienceId}/ticket-variants`,
+    {
+      headers: { Authorization: `Bearer ${token}`, 'Accept-Language': 'it' },
+      next: { revalidate: 60 },
+    },
+  )
+  if (!res.ok) return []
+  const data = await res.json()
+  return data.items ?? []
+}
+
+export async function fetchExperiences(): Promise<ExperienceWithPrice[]> {
   const token = await getAccessToken()
 
   const res = await fetch(`${API_BASE}/v1/experiences`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Accept-Language': 'it',
-    },
+    headers: { Authorization: `Bearer ${token}`, 'Accept-Language': 'it' },
     next: { revalidate: 60 },
   })
 
@@ -49,5 +75,20 @@ export async function fetchExperiences(): Promise<ExperiencesResponse> {
     throw new Error(`API failed (${res.status}): ${await res.text()}`)
   }
 
-  return res.json()
+  const { items }: { items: Experience[] } = await res.json()
+
+  // Fetch all ticket variants in parallel with the same token
+  const variantsList = await Promise.all(
+    items.map((exp) => fetchVariants(exp.id, token)),
+  )
+
+  return items.map((exp, i) => {
+    const cheapest = variantsList[i].sort(
+      (a, b) => a.price.value - b.price.value,
+    )[0]
+    return {
+      ...exp,
+      priceFrom: cheapest ? formatPrice(cheapest) : null,
+    }
+  })
 }

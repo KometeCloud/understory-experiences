@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
-import type { Experience } from '@/lib/understory'
+import type { ExperienceWithPrice } from '@/lib/understory'
 
 type Media = { type: string; url: string }
 
@@ -11,7 +11,7 @@ export function BookingModal({
   open,
   onClose,
 }: {
-  exp: Experience
+  exp: ExperienceWithPrice
   open: boolean
   onClose: () => void
 }) {
