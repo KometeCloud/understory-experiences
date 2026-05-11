@@ -15,7 +15,16 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Understory – Esperienze",
-  description: "Pagina di test per le esperienze Understory",
+  description: "Scopri e prenota le nostre esperienze",
+  icons: {
+    icon: "/ADD-FAVICON.png",
+    apple: "/ADD-FAVICON.png",
+  },
+  openGraph: {
+    title: "Understory – Esperienze",
+    description: "Scopri e prenota le nostre esperienze",
+    images: [{ url: "/ADD-FAVICON.png" }],
+  },
 };
 
 export default function RootLayout({
