@@ -16,6 +16,8 @@ function ExperienceCard({ exp }: { exp: Experience }) {
   const media = exp.media as Media[] | undefined
   const coverUrl = media?.find((m) => m.type === 'IMAGE')?.url
   const state = exp.state
+  const name = exp.name as string
+  const description = exp.description as string | undefined
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
@@ -38,7 +40,7 @@ function ExperienceCard({ exp }: { exp: Experience }) {
       <div className="p-5 flex flex-col gap-3 flex-1">
         <div className="flex items-start justify-between gap-2">
           <h2 className="font-semibold text-gray-900 leading-snug text-lg">
-            {exp.name as string}
+            {name}
           </h2>
           <span
             className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full ${STATE_COLORS[state] ?? 'bg-gray-100 text-gray-500'}`}
@@ -47,10 +49,8 @@ function ExperienceCard({ exp }: { exp: Experience }) {
           </span>
         </div>
 
-        {exp.description && (
-          <p className="text-sm text-gray-600 line-clamp-3">
-            {exp.description as string}
-          </p>
+        {description && (
+          <p className="text-sm text-gray-600 line-clamp-3">{description}</p>
         )}
 
         <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
