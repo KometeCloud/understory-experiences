@@ -5,13 +5,14 @@ async function getAccessToken(): Promise<string> {
   const res = await fetch(AUTH_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    // URLSearchParams encodes ~ as %7E but Understory auth server requires the literal ~
     body: new URLSearchParams({
       grant_type: 'client_credentials',
       client_id: process.env.UNDERSTORY_CLIENT_ID!,
       client_secret: process.env.UNDERSTORY_CLIENT_SECRET!,
       audience: API_BASE,
       scope: 'experience.read',
-    }),
+    }).toString().replace(/%7E/gi, '~'),
     cache: 'no-store',
   })
 
