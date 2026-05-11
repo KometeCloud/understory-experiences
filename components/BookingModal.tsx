@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Experience } from '@/lib/understory'
 
 type Media = { type: string; url: string }
@@ -16,11 +16,17 @@ export function BookingModal({
   onClose: () => void
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null)
+  const [current, setCurrent] = useState(0)
+
+  const name = exp.name as string
+  const description = exp.description as string | undefined
+  const images = (exp.media as Media[] | undefined)?.filter((m) => m.type === 'IMAGE') ?? []
 
   useEffect(() => {
     const dialog = dialogRef.current
     if (!dialog) return
     if (open) {
+      setCurrent(0)
       dialog.showModal()
       setTimeout(() => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,9 +41,13 @@ export function BookingModal({
     if (e.target === dialogRef.current) onClose()
   }
 
-  const name = exp.name as string
-  const description = exp.description as string | undefined
-  const images = (exp.media as Media[] | undefined)?.filter((m) => m.type === 'IMAGE') ?? []
+  function prev() {
+    setCurrent((i) => (i === 0 ? images.length - 1 : i - 1))
+  }
+
+  function next() {
+    setCurrent((i) => (i === images.length - 1 ? 0 : i + 1))
+  }
 
   return (
     <dialog
@@ -59,23 +69,47 @@ export function BookingModal({
       </div>
 
       <div className="overflow-y-auto flex flex-col">
-        {/* Photo gallery — horizontal scroll */}
+        {/* Full-width carousel */}
         {images.length > 0 && (
-          <div className="flex gap-2 overflow-x-auto p-3 shrink-0 snap-x snap-mandatory">
-            {images.map((img, i) => (
-              <div
-                key={i}
-                className="relative shrink-0 w-72 aspect-video rounded-xl overflow-hidden snap-start"
-              >
-                <Image
-                  src={img.url}
-                  alt={`${name} – foto ${i + 1}`}
-                  fill
-                  className="object-cover"
-                  sizes="288px"
-                />
-              </div>
-            ))}
+          <div className="relative w-full aspect-video shrink-0 bg-black">
+            <Image
+              src={images[current].url}
+              alt={`${name} – foto ${current + 1}`}
+              fill
+              className="object-cover"
+              sizes="672px"
+            />
+
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={prev}
+                  aria-label="Foto precedente"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full w-9 h-9 flex items-center justify-center transition-colors"
+                >
+                  ‹
+                </button>
+                <button
+                  onClick={next}
+                  aria-label="Foto successiva"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full w-9 h-9 flex items-center justify-center transition-colors"
+                >
+                  ›
+                </button>
+
+                {/* Dot indicators */}
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+                  {images.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrent(i)}
+                      aria-label={`Vai a foto ${i + 1}`}
+                      className={`w-1.5 h-1.5 rounded-full transition-colors ${i === current ? 'bg-white' : 'bg-white/50'}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
 
