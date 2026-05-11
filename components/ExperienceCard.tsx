@@ -69,7 +69,7 @@ export function ExperienceCard({ exp }: { exp: Experience }) {
       </div>
 
       <BookingModal
-        experienceId={exp.id}
+        exp={exp}
         open={bookingOpen}
         onClose={() => setBookingOpen(false)}
       />

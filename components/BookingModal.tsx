@@ -1,13 +1,17 @@
 'use client'
 
+import Image from 'next/image'
 import { useEffect, useRef } from 'react'
+import type { Experience } from '@/lib/understory'
+
+type Media = { type: string; url: string }
 
 export function BookingModal({
-  experienceId,
+  exp,
   open,
   onClose,
 }: {
-  experienceId: string
+  exp: Experience
   open: boolean
   onClose: () => void
 }) {
@@ -18,7 +22,6 @@ export function BookingModal({
     if (!dialog) return
     if (open) {
       dialog.showModal()
-      // Let React flush the widget div into the DOM, then trigger re-scan
       setTimeout(() => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ;(window as any).UNDERSTORY?.initialize?.()
@@ -32,14 +35,19 @@ export function BookingModal({
     if (e.target === dialogRef.current) onClose()
   }
 
+  const name = exp.name as string
+  const description = exp.description as string | undefined
+  const coverUrl = (exp.media as Media[] | undefined)?.find((m) => m.type === 'IMAGE')?.url
+
   return (
     <dialog
       ref={dialogRef}
       onClose={onClose}
       onClick={handleBackdropClick}
-      className="m-auto w-full max-w-2xl rounded-2xl p-0 shadow-2xl open:flex open:flex-col"
+      className="m-auto w-full max-w-2xl rounded-2xl p-0 shadow-2xl open:flex open:flex-col max-h-[90vh]"
     >
-      <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
         <span className="font-semibold text-gray-900">Prenota</span>
         <button
           onClick={onClose}
@@ -50,16 +58,39 @@ export function BookingModal({
         </button>
       </div>
 
-      <div className="p-4 overflow-auto">
-        {open && (
-          <div
-            className="understory-booking-widget"
-            data-company-id={process.env.NEXT_PUBLIC_UNDERSTORY_COMPANY_ID}
-            data-storefront-id={process.env.NEXT_PUBLIC_UNDERSTORY_STOREFRONT_ID}
-            data-experience-id={experienceId}
-            data-language="it"
-          />
+      <div className="overflow-y-auto flex flex-col">
+        {/* Experience info */}
+        {coverUrl && (
+          <div className="relative w-full aspect-video shrink-0">
+            <Image
+              src={coverUrl}
+              alt={name}
+              fill
+              className="object-cover"
+              sizes="672px"
+            />
+          </div>
         )}
+
+        <div className="px-5 py-4 border-b border-gray-100">
+          <h2 className="text-xl font-bold text-gray-900">{name}</h2>
+          {description && (
+            <p className="text-sm text-gray-600 mt-1">{description}</p>
+          )}
+        </div>
+
+        {/* Booking widget */}
+        <div className="p-4">
+          {open && (
+            <div
+              className="understory-booking-widget"
+              data-company-id={process.env.NEXT_PUBLIC_UNDERSTORY_COMPANY_ID}
+              data-storefront-id={process.env.NEXT_PUBLIC_UNDERSTORY_STOREFRONT_ID}
+              data-experience-id={exp.id}
+              data-language="it"
+            />
+          )}
+        </div>
       </div>
     </dialog>
   )
