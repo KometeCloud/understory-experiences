@@ -37,7 +37,7 @@ export function BookingModal({
 
   const name = exp.name as string
   const description = exp.description as string | undefined
-  const coverUrl = (exp.media as Media[] | undefined)?.find((m) => m.type === 'IMAGE')?.url
+  const images = (exp.media as Media[] | undefined)?.filter((m) => m.type === 'IMAGE') ?? []
 
   return (
     <dialog
@@ -59,23 +59,33 @@ export function BookingModal({
       </div>
 
       <div className="overflow-y-auto flex flex-col">
-        {/* Experience info */}
-        {coverUrl && (
-          <div className="relative w-full aspect-video shrink-0">
-            <Image
-              src={coverUrl}
-              alt={name}
-              fill
-              className="object-cover"
-              sizes="672px"
-            />
+        {/* Photo gallery — horizontal scroll */}
+        {images.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto p-3 shrink-0 snap-x snap-mandatory">
+            {images.map((img, i) => (
+              <div
+                key={i}
+                className="relative shrink-0 w-72 aspect-video rounded-xl overflow-hidden snap-start"
+              >
+                <Image
+                  src={img.url}
+                  alt={`${name} – foto ${i + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="288px"
+                />
+              </div>
+            ))}
           </div>
         )}
 
+        {/* Title + full description */}
         <div className="px-5 py-4 border-b border-gray-100">
           <h2 className="text-xl font-bold text-gray-900">{name}</h2>
           {description && (
-            <p className="text-sm text-gray-600 mt-1">{description}</p>
+            <p className="text-sm text-gray-600 mt-2 whitespace-pre-line leading-relaxed">
+              {description}
+            </p>
           )}
         </div>
 
