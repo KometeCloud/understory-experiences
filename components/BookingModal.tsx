@@ -18,6 +18,11 @@ export function BookingModal({
     if (!dialog) return
     if (open) {
       dialog.showModal()
+      // Let React flush the widget div into the DOM, then trigger re-scan
+      setTimeout(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ;(window as any).UNDERSTORY?.initialize?.()
+      }, 0)
     } else if (dialog.open) {
       dialog.close()
     }
